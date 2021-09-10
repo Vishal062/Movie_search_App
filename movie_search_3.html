@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie log</title>
+    <style>
+        body {
+            color: white;
+            background-image: url("https://wallpaper-house.com/data/out/10/wallpaper2you_447459.jpg");
+            background-repeat: no-repeat;
+            /* background-size: auto; */
+             background-size: 100% 800px;
+            font-family: sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 50px;
+            color: gold;
+        }
+
+        h1+div {
+            text-align: center;
+        }
+
+        input {
+            width: 250px;
+            height: 30px;
+            border: none;
+            border-radius: 20px;
+            padding-left: 15px;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        button {
+            border: none;
+            border-radius: 50%;
+            height: 35px;
+            width: 120px;
+            background-color: gold;
+            font-weight: 1000;
+            margin-left: 20px;
+            color: black;
+            cursor: pointer;
+        }
+        /* Basically its works as a container */
+        #appendData {   
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            margin-top: 100px;
+        }
+
+        #movie-div {
+            background-color: rgba(255, 255, 255, .15);
+            box-shadow: 0 5px 15px rgb(0 0 0 / 50%);
+            backdrop-filter: blur(5px);
+            padding: 20px;
+            max-width: 50%;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+        }
+
+        h3 {
+            font-size: 40px;
+            margin-top: 10px;
+        }
+
+        span {
+            font-size: 20px;
+        }
+
+        p {
+            max-width: 60%;
+            font-size: 20px;
+        }
+
+        #movie-info {
+            margin-bottom: 30px;
+        }
+
+        h6 {
+            font-size: 17px;
+            margin-bottom: -20px;
+        }
+
+        #movie-info span:nth-of-type(5) {
+            font-size: 10px;
+            background-color: black;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        #not_found {
+            display: none;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        #not_found>img {
+            width: 600px;
+            border-radius: 40%;
+        }
+    </style>
+</head>
+<body>
+    <h1>-: Search Movie in My Database :-</h1>
+    <div>
+        <input type="text" placeholder="Enter your Movie Name" id="name">
+        <button onclick="getRequest()">search</button>
+    </div>
+    <div id="not_found">
+        <img src="https://carems.in/assets/images/404.gif" alt="Not Found">
+    </div>
+    <div id="appendData"></div>
+</body>
+</html>
+<script>
+    let data = document.getElementById("appendData");
+    let noData = document.getElementById("not_found");
+
+    //1 getting fetch data using async await>>>>
+
+    async function getRequest(){
+        data.innerHTML = "";
+        let input = document.getElementById("name").value;
+        let result = await fetch("http://www.omdbapi.com/?t=" + input + "&apikey=234b003d");
+        //console.log('result:', result);
+
+        let mainData = await result.json();
+        let obj = mainData; //Finally getting the data in a format
+        //console.log('obj:', obj);
+
+        //2 if movie not found>>>
+        if(obj.Error == "Movie not found!") {   //The error msg should be same then only its work
+            noData.style.display = "block";
+        }
+        else {
+            noData.style.display = "none";
+            //create all styles
+            let movieFrame = document.createElement("img");
+            let movieTitle = document.createElement("h3");
+            let year = document.createElement("span");
+            let rated = document.createElement("span");
+            let rating = document.createElement("span");
+            let runtime = document.createElement("span");
+            let plot = document.createElement("p");
+            let actors = document.createElement("h6");
+            let genre = document.createElement("h6");
+            let recommended = document.createElement("span");
+
+            let movieDiv = document.createElement("div");
+            let detailsDiv = document.createElement("div");
+
+            movieFrame.src = obj.Poster;
+            movieTitle.innerHTML = obj.Title;   //the name should be same as apidata;
+
+            year.innerHTML = obj.Year;
+            rated.innerHTML = " | " + obj.Rated;
+            runtime.innerHTML = " | " + obj.Runtime;
+            rating.innerHTML = " | " + obj.imdbRating + "/10 IMDb ";
+            genre.innerHTML = "Genre: " + obj.Genre;
+            recommended.innerHTML = "  Recommended";
+
+            if(obj.imdbRating > 8.5) {
+                rating.innerHTML += " | ";
+                detailsDiv.append(year, rated, runtime, rating, recommended);
+                //detailsDiv.setAttribute("id", "movie-info");
+                //console.log('detailsDiv:', detailsDiv)
+            }
+            else 
+                detailsDiv.append(year, rated, runtime, rating);
+                detailsDiv.setAttribute("id", "movie-info");
+
+                 plot.innerHTML = obj.Plot;
+                actors.innerHTML = "Starring: " + obj.Actors;
+
+                movieDiv.append(movieTitle, detailsDiv, plot, actors, genre);
+                movieDiv.setAttribute("id", "movie-div")
+                data.append(movieDiv, movieFrame);
+            
+        }
+
+    }
+</script>
